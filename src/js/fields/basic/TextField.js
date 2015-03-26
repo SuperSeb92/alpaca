@@ -51,9 +51,35 @@
                 this.options.attributes = {};
             }
 
-            if (typeof(this.options.allowOptionalEmpty) == "undefined")
+            if (typeof(this.options.allowOptionalEmpty) === "undefined")
             {
                 this.options.allowOptionalEmpty = true;
+            }
+
+            // DOM "autocomplete"
+            if (this.options.autocomplete && typeof(this.options.autocomplete) === "string")
+            {
+                if (this.options.autocomplete.toLowerCase() === "on")
+                {
+                    this.options.autocomplete = true;
+                }
+                else if (this.options.autocomplete.toLowerCase() === "true")
+                {
+                    this.options.autocomplete = true;
+                }
+                else if (this.options.autocomplete.toLowerCase() === "yes")
+                {
+                    this.options.autocomplete = true;
+                }
+                else
+                {
+                    this.options.autocomplete = false;
+                }
+            }
+
+            if (typeof(this.options.autocomplete) === "undefined")
+            {
+                this.options.autocomplete = false;
             }
         },
 
@@ -82,6 +108,9 @@
 
                 if (self.control)
                 {
+                    // autocomplete
+                    self.applyAutocomplete();
+
                     // mask
                     self.applyMask();
 
@@ -94,6 +123,21 @@
 
                 callback();
             });
+        },
+
+        applyAutocomplete: function()
+        {
+            var self = this;
+
+            // autocomplete
+            if (self.options.autocomplete)
+            {
+                $(self.field).addClass("alpaca-autocomplete");
+                $(self.control).attr("autocomplete", (self.options.autocomplete ? "on" : "off"));
+
+                // CALLBACK: "autocomplete"
+                self.fireCallback("autocomplete");
+            }
         },
 
         applyMask: function()
@@ -392,19 +436,19 @@
 
             var status =  this._validatePattern();
             valInfo["invalidPattern"] = {
-                "message": status ? "" : Alpaca.substituteTokens(this.view.getMessage("invalidPattern"), [this.schema.pattern]),
+                "message": status ? "" : Alpaca.substituteTokens(this.getMessage("invalidPattern"), [this.schema.pattern]),
                 "status": status
             };
 
             status = this._validateMaxLength();
             valInfo["stringTooLong"] = {
-                "message": status ? "" : Alpaca.substituteTokens(this.view.getMessage("stringTooLong"), [this.schema.maxLength]),
+                "message": status ? "" : Alpaca.substituteTokens(this.getMessage("stringTooLong"), [this.schema.maxLength]),
                 "status": status
             };
 
             status = this._validateMinLength();
             valInfo["stringTooShort"] = {
-                "message": status ? "" : Alpaca.substituteTokens(this.view.getMessage("stringTooShort"), [this.schema.minLength]),
+                "message": status ? "" : Alpaca.substituteTokens(this.getMessage("stringTooShort"), [this.schema.minLength]),
                 "status": status
             };
 
@@ -673,6 +717,11 @@
                         "title": "Data attributes for the underlying DOM input control",
                         "description": "Allows you to specify a key/value map of data attributes that will be added as DOM attribuets for the underlying input control.  The data attributes will be added as data-{name}='{value}'.",
                         "type": "object"
+                    },
+                    "autocomplete": {
+                        "title": "HTML autocomplete attribute for the underlying DOM input control",
+                        "description": "Allows you to specify the autocomplete attribute for the underlying input control whether or not field should have autocomplete enabled.",
+                        "type": "string"
                     }
                 }
             });
